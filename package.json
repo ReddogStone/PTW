@@ -1,0 +1,12 @@
+{
+	"name": "PTW",
+	"author": "Elshad Shirinov",
+	"dependencies": {
+		"node-monad": "https://github.com/ReddogStone/node-monad",
+		"mongodb": ">=1.4.30",
+		"node-static": ">=0.7.6"
+	},
+	"scripts": {
+		"start": "node --harmony web-server ./public"
+	}
+}
