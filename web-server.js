@@ -11,7 +11,7 @@ var drawModel = require('./lib/draw-model').initialize(fs);
 var rpcLib = require('./lib/rpc');
 var V = rpcLib.validators;
 
-var STORAGE_PATH = path.join(__dirname, 'data/storage.json');
+var STORAGE_PATH = path.join(__dirname, 'data/storage.dat');
 
 function parseBody(request) {
 	return function(callback) {
@@ -63,8 +63,7 @@ cont(function*() {
 					};
 
 					data.push(entry);
-
-					yield drawModel.store(data, STORAGE_PATH);
+					yield drawModel.push(STORAGE_PATH, entry);
 
 					waitingQueue.forEach(function(callback) {
 						callback(null, [entry]);

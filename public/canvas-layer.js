@@ -38,8 +38,7 @@ var CanvasMapType = (function() {
 		var transformedParts = parts.map(function(part) {
 			return {
 				x: factor * part.x - coord.x * TILE_SIZE,
-				y: factor * part.y - coord.y * TILE_SIZE,
-				color: part.color
+				y: factor * part.y - coord.y * TILE_SIZE
 			};
 		});
 

@@ -130,13 +130,13 @@ var BrushPool = (function() {
 				var y = currentPart.y;
 
 				var lineWidth = size;
-				var color = Color.toCss(currentPart.color);
+				var cssColor = Color.toCss(color);
 
 				if (lastPart) {
 					var lastX = lastPart.x;
 					var lastY = lastPart.y;
 
-					context.strokeStyle = color;
+					context.strokeStyle = cssColor;
 					context.lineWidth = lineWidth;
 
 					context.beginPath();
@@ -145,7 +145,7 @@ var BrushPool = (function() {
 					context.stroke();
 				}
 
-				context.fillStyle = color;
+				context.fillStyle = cssColor;
 				context.beginPath();
 				context.arc(x, y, lineWidth * 0.5, 0, Math.PI * 2);
 				context.fill();
@@ -156,9 +156,9 @@ var BrushPool = (function() {
 	function make(description) {
 		var shapeFunc = null;
 		switch (description.shape) {
-			case 'soft-circle': return makeImageBrush(circleShape, description.size, description.color);
-			case 'square': return makeImageBrush(squareShape, description.size, description.color);
-			case 'smooth-line': return makeLineBrush(description.size, description.color);
+			case BrushShape.CIRCLE: return makeImageBrush(circleShape, description.size, description.color);
+			case BrushShape.SQUARE: return makeImageBrush(squareShape, description.size, description.color);
+			case BrushShape.LINE: return makeLineBrush(description.size, description.color);
 			default: throw new Error('No know shape "' + description.shape + '"');
 		}
 		

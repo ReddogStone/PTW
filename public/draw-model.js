@@ -17,9 +17,9 @@ var DrawModel = (function() {
 			return function(callback) {
 				var request = new XMLHttpRequest();
 				request.onload = function() {
-					var jsonResponse = JSON.parse(request.response);
+					var jsonResponse = JSON.parse(request.responseText);
 					if (jsonResponse.id !== requestObject.id) {
-						return callback(new Error('Received response with a wrong ID: ' + request.response));
+						return callback(new Error('Received response with a wrong ID: ' + request.responseText));
 					}
 					if (jsonResponse.error) {
 						return callback(new Error('JSON-RPC Error: (' + jsonResponse.error.code + ') ' + jsonResponse.error.message));

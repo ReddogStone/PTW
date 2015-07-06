@@ -15,3 +15,9 @@ var COLORS = [
 ];
 
 var JSON_RPC_URL = 'ptw.rpc';
+
+var BrushShape = {
+	CIRCLE: 0,
+	SQUARE: 1,
+	LINE: 2
+};

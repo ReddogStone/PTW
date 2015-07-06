@@ -2,7 +2,7 @@ var BrushPicker = (function() {
 	
 	return function(onValueChanged) {
 		var controlDescriptions = [
-			{
+/*			{
 				title: 'Solid Square',
 				color: 'white',
 				text: 'Square',
@@ -17,18 +17,18 @@ var BrushPicker = (function() {
 				onClick: function() {
 					onValueChanged('soft-circle');
 				}
-			},
+			}, */
 			{
 				title: 'Line',
 				color: 'white',
 				text: 'Line',
 				onClick: function() {
-					onValueChanged('smooth-line');
+					onValueChanged(BrushShape.LINE);
 				}
 			}
 		];
 
-		var SELECTED = 2;
+		var SELECTED = controlDescriptions.length - 1;
 		controlDescriptions[SELECTED].onClick();
 		return RadioBar(controlDescriptions, SELECTED);
 	};

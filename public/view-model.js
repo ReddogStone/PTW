@@ -1,5 +1,5 @@
 var ViewModel = (function() {
-	var brushShape = 'square';
+	var brushShape = BrushShape.LINE;
 	var brushSize = 1;
 	var color = Color.make(0.0, 0.0, 0.0, 1.0);
 	var pixelSize = 1;
