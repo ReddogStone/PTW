@@ -93,6 +93,28 @@ var BrushPool = (function() {
 		};
 	}
 
+	function line(x0, y0, x1, y1, setPixel) {
+		var dx = Math.abs(x1 - x0)
+		var sx = x0 < x1 ? 1 : -1;
+		var dy = -Math.abs(y1 - y0)
+		var sy = y0 < y1 ? 1 : -1;
+		var err = dx + dy;
+		var e2; /* error value e_xy */
+
+		var xi = x0;
+		var yi = y0;
+
+		while (true) {
+			setPixel(xi, yi);
+			if ( ((xi - x1) * sx >= 0) && ((yi - y1) * sy >= 0) ) {
+				break;
+			}
+			e2 = 2 * err;
+			if (e2 > dy) { err += dy; xi += sx; } /* e_xy + e_x > 0 */
+			if (e2 < dx) { err += dx; yi += sy; } /* e_xy + e_y < 0 */
+		}
+	}
+
 	function makeLineBrush(size, color) {
 		return {
 			size: size,
@@ -136,19 +158,48 @@ var BrushPool = (function() {
 					var lastX = lastPart.x;
 					var lastY = lastPart.y;
 
-					context.strokeStyle = cssColor;
+					var bb = this.getBBForStroke(size, parts);
+					var imageData = context.getImageData(bb.x, bb.y, bb.sx, bb.sy);
+					var data = imageData.data;
+
+					var hs = size * 0.5;
+					var red = Math.floor(color.red * 255);
+					var green = Math.floor(color.green * 255);
+					var blue = Math.floor(color.blue * 255);
+					var alpha = Math.floor(color.alpha * 255);
+
+					function setPixel(x, y) {
+						if (x < 0 || x > bb.sx || y < 0 || y > bb.sy) {
+							return;
+						}
+
+						var offset = (y * bb.sx + x) * 4;
+						data[offset] = red;
+						data[offset + 1] = green;
+						data[offset + 2] = blue;
+						data[offset + 3] = alpha;
+					}
+
+					line(lastX - bb.x, lastY - bb.y, x - bb.x, y - bb.y, setPixel);
+//					line(lastX - bb.x + hs, lastY - bb.y, x - bb.x + hs, y - bb.y, setPixel);
+
+					context.putImageData(imageData, bb.x, bb.y);
+
+/*					context.strokeStyle = cssColor;
 					context.lineWidth = lineWidth;
 
 					context.beginPath();
 					context.moveTo(lastX, lastY);
 					context.lineTo(x, y);
-					context.stroke();
+					context.stroke(); */
+
+
 				}
 
-				context.fillStyle = cssColor;
+/*				context.fillStyle = cssColor;
 				context.beginPath();
 				context.arc(x, y, lineWidth * 0.5, 0, Math.PI * 2);
-				context.fill();
+				context.fill(); */
 			}
 		};
 	}
