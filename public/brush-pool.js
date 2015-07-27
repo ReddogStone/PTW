@@ -94,25 +94,53 @@ var BrushPool = (function() {
 	}
 
 	function line(x0, y0, x1, y1, setPixel) {
-		var dx = Math.abs(x1 - x0)
-		var sx = x0 < x1 ? 1 : -1;
-		var dy = -Math.abs(y1 - y0)
-		var sy = y0 < y1 ? 1 : -1;
-		var err = dx + dy;
-		var e2; /* error value e_xy */
+		var startX = Math.ceil(x0);
+		var startY = Math.ceil(y0);
 
-		var xi = x0;
-		var yi = y0;
+		var endX = Math.floor(x1);
+		var endY = Math.floor(y1);
 
-		while (true) {
-			setPixel(xi, yi);
-			if ( ((xi - x1) * sx >= 0) && ((yi - y1) * sy >= 0) ) {
-				break;
+		var dx = x1 - x0;
+		var dy = y1 - y0;
+
+		var slope = dy / dx;
+
+		var offY = (startX - x0) * slope;
+
+		setPixel(Math.floor(x0), Math.floor(y0), 1);
+		setPixel(Math.ceil(x1), Math.ceil(y1), 1);
+
+		var y = startY;
+		for (var x = startX; x <= endX; x++) {
+			setPixel(x, y, 1 + offY);
+			setPixel(x, y - 1, -offY);
+			offY += slope;
+			if (offY < -1) {
+				offY += 1;
+				y -= 1;
 			}
-			e2 = 2 * err;
-			if (e2 > dy) { err += dy; xi += sx; } /* e_xy + e_x > 0 */
-			if (e2 < dx) { err += dx; yi += sy; } /* e_xy + e_y < 0 */
 		}
+	}
+
+	function drawLinePath(context, x0, y0, x1, y1, size, cssColor) {
+		var dx = x1 - x0;
+		var dy = y1 - y0;
+		var l = Math.sqrt(dx * dx + dy * dy);
+		var scale = size * 0.5 / l;
+		dx *= scale;
+		dy *= scale;
+
+		context.fillStyle = cssColor;
+
+		context.beginPath();
+		context.moveTo(x0 - dx, y0 - dy);
+		context.arcTo(x0 - dx - dy, y0 - dy + dx, x0 - dy, y0 + dx, size * 0.5);
+		context.lineTo(x1 - dy, y1 + dx);
+		context.arcTo(x1 - dy + dx, y1 + dx + dy, x1 + dx, y1 + dy, size * 0.5);
+		context.arcTo(x1 + dx + dy, y1 + dy - dx, x1 + dy, y1 - dx, size * 0.5);
+		context.lineTo(x0 + dy, y0 - dx);
+		context.arcTo(x0 + dy - dx, y0 - dx - dy, x0 - dx, y0 - dy, size * 0.5);
+		context.fill();
 	}
 
 	function makeLineBrush(size, color) {
@@ -148,58 +176,63 @@ var BrushPool = (function() {
 				var lastPart = parts[parts.length - 2];
 				var currentPart = parts[parts.length - 1];
 
-				var x = currentPart.x;
-				var y = currentPart.y;
+				var curX = currentPart.x;
+				var curY = currentPart.y;
 
 				var lineWidth = size;
-				var cssColor = Color.toCss(color);
 
+				var lastX = curX;
+				var lastY = curY;
 				if (lastPart) {
 					var lastX = lastPart.x;
 					var lastY = lastPart.y;
-
-					var bb = this.getBBForStroke(size, parts);
-					var imageData = context.getImageData(bb.x, bb.y, bb.sx, bb.sy);
-					var data = imageData.data;
-
-					var hs = size * 0.5;
-					var red = Math.floor(color.red * 255);
-					var green = Math.floor(color.green * 255);
-					var blue = Math.floor(color.blue * 255);
-					var alpha = Math.floor(color.alpha * 255);
-
-					function setPixel(x, y) {
-						if (x < 0 || x > bb.sx || y < 0 || y > bb.sy) {
-							return;
-						}
-
-						var offset = (y * bb.sx + x) * 4;
-						data[offset] = red;
-						data[offset + 1] = green;
-						data[offset + 2] = blue;
-						data[offset + 3] = alpha;
-					}
-
-					line(lastX - bb.x, lastY - bb.y, x - bb.x, y - bb.y, setPixel);
-//					line(lastX - bb.x + hs, lastY - bb.y, x - bb.x + hs, y - bb.y, setPixel);
-
-					context.putImageData(imageData, bb.x, bb.y);
-
-/*					context.strokeStyle = cssColor;
-					context.lineWidth = lineWidth;
-
-					context.beginPath();
-					context.moveTo(lastX, lastY);
-					context.lineTo(x, y);
-					context.stroke(); */
-
-
 				}
 
-/*				context.fillStyle = cssColor;
-				context.beginPath();
-				context.arc(x, y, lineWidth * 0.5, 0, Math.PI * 2);
-				context.fill(); */
+				if (!color) {
+					
+					return;
+				}
+
+				var backColor = Color.toCss(Color.make(color.red, color.green, color.blue, 0.2));
+				drawLinePath(context, lastX, lastY, curX, curY, lineWidth + 1.5, backColor);
+
+				var cssColor = Color.toCss(color);
+				drawLinePath(context, lastX, lastY, curX, curY, lineWidth + 0.5, cssColor);
+
+					// // Smooth
+					// var bb = this.getBBForStroke(size, parts);
+					// bb.x = Math.floor(bb.x);
+					// bb.y = Math.floor(bb.y);
+					// bb.sx = Math.ceil(bb.sx);
+					// bb.sy = Math.ceil(bb.sy);
+					// var imageData = context.getImageData(bb.x, bb.y, bb.sx, bb.sy);
+					// var data = imageData.data;
+
+					// var hs = size * 0.5;
+					// var red = Math.floor(color.red * 255);
+					// var green = Math.floor(color.green * 255);
+					// var blue = Math.floor(color.blue * 255);
+					// var alpha = Math.floor(color.alpha * 255);
+
+					// function setPixel(x, y, a) {
+					// 	if (x < 0 || x > bb.sx || y < 0 || y > bb.sy) {
+					// 		return;
+					// 	}
+
+					// 	var offset = (y * bb.sx + x) * 4;
+					// 	data[offset] = red;
+					// 	data[offset + 1] = green;
+					// 	data[offset + 2] = blue;
+					// 	data[offset + 3] = alpha * a;
+					// }
+
+					// line(lastX - bb.x + offX, lastY - bb.y + offY, curX - bb.x + offX, curY - bb.y + offY, setPixel);
+//					line(lastX - bb.x + hs, lastY - bb.y, x - bb.x + hs, y - bb.y, setPixel);
+
+//					context.putImageData(imageData, bb.x, bb.y);
+
+//					context.strokeStyle = cssColor;
+//					context.lineWidth = lineWidth;
 			}
 		};
 	}
