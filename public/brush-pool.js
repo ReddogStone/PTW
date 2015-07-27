@@ -2,7 +2,8 @@ var BrushPool = (function() {
 	var brushes = {};
 
 	function hashString(description) {
-		return description.shape + '_' + description.size + '_' + Color.toCss(description.color);
+		return description.shape + '_' + description.size + '_' + 
+			(description.color ? Color.toCss(description.color) : 'null');
 	}
 
 	function squareShape(size) {
@@ -133,13 +134,17 @@ var BrushPool = (function() {
 		context.fillStyle = cssColor;
 
 		context.beginPath();
-		context.moveTo(x0 - dx, y0 - dy);
-		context.arcTo(x0 - dx - dy, y0 - dy + dx, x0 - dy, y0 + dx, size * 0.5);
-		context.lineTo(x1 - dy, y1 + dx);
-		context.arcTo(x1 - dy + dx, y1 + dx + dy, x1 + dx, y1 + dy, size * 0.5);
-		context.arcTo(x1 + dx + dy, y1 + dy - dx, x1 + dy, y1 - dx, size * 0.5);
-		context.lineTo(x0 + dy, y0 - dx);
-		context.arcTo(x0 + dy - dx, y0 - dx - dy, x0 - dx, y0 - dy, size * 0.5);
+		if (x0 === x1 && y0 === y1) {
+			context.arc(x0, y0, size * 0.5, 0, 2 * Math.PI);
+		} else {
+			context.moveTo(x0 - dx, y0 - dy);
+			context.arcTo(x0 - dx - dy, y0 - dy + dx, x0 - dy, y0 + dx, size * 0.5);
+			context.lineTo(x1 - dy, y1 + dx);
+			context.arcTo(x1 - dy + dx, y1 + dx + dy, x1 + dx, y1 + dy, size * 0.5);
+			context.arcTo(x1 + dx + dy, y1 + dy - dx, x1 + dy, y1 - dx, size * 0.5);
+			context.lineTo(x0 + dy, y0 - dx);
+			context.arcTo(x0 + dy - dx, y0 - dx - dy, x0 - dx, y0 - dy, size * 0.5);
+		}
 		context.fill();
 	}
 
@@ -188,8 +193,11 @@ var BrushPool = (function() {
 					var lastY = lastPart.y;
 				}
 
-				if (!color) {
-					
+				if (color === null) {
+					context.save();
+					context.globalCompositeOperation = 'destination-out';
+					drawLinePath(context, lastX, lastY, curX, curY, lineWidth + 0.5, backColor);
+					context.restore();
 					return;
 				}
 

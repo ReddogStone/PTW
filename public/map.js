@@ -13,7 +13,8 @@ var Map = (function() {
 			mapTypeControlOptions: {
 				mapTypeIds: [CUSTOM_MAPTYPE_ID]
 			},
-			mapTypeId: CUSTOM_MAPTYPE_ID
+			mapTypeId: CUSTOM_MAPTYPE_ID,
+			disableDefaultUI: true
 		};
 
 		var map = new google.maps.Map(mapDiv, mapOptions);
@@ -111,6 +112,9 @@ var Map = (function() {
 			},
 			set onZoomChanged(value) {
 				onZoomChanged = value;
+			},
+			set draggable(value) {
+				map.setOptions({ draggable: value });
 			}
 		};
 	};

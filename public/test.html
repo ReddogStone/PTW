@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Paint The World</title>
+
+<script src="constants.js"></script>
+<script src="brush-pool.js"></script>
+<script src="color.js"></script>
+
+<script>
+
+function main() {
+	var canvas = document.getElementById('canvas');
+	var context = canvas.getContext('2d');
+
+	var brush = BrushPool.get({ shape: BrushShape.LINE, size: 15, color: Color.make(0, 0, 0, 1)});
+	brush.draw(context, 45, [{x: 50, y: 200}, {x: 900, y: 150}]);
+}
+
+</script>
+</head>
+
+<body onload="main();">
+	<canvas width="1024" height="768" id="canvas"></canvas>
+</body>
+
+</html>
+

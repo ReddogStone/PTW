@@ -28,7 +28,7 @@ var BrushTool = (function() {
 			mouseUp: function(mouseButton, event) {
 				if (mouseButton === 0) {
 					pixelController.stopPainting();
-				}				
+				}
 			}
 		};
 	};

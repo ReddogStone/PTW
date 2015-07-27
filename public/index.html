@@ -19,6 +19,7 @@
 <script src="brush-pool.js"></script>
 
 <script src="brush-tool/radio-bar.js"></script>
+<script src="brush-tool/tool-picker.js"></script>
 <script src="brush-tool/color-picker.js"></script>
 <script src="brush-tool/brush-picker.js"></script>
 <script src="brush-tool/size-picker.js"></script>
@@ -41,10 +42,31 @@ function initialize() {
 		ViewModel.pixelSize = SQUARE_WIDTH * (1 << zoom);
 	};
 
+	var brushTool = BrushTool(map, PixelController, ViewModel);
+	var noop = function() {};
+	var noopTool = { mouseMove: noop, mouseDown: noop, mouseUp: noop };
+
+	var toolPicker = ToolPicker(function(value) {
+		switch (value) {
+			case 'clear':
+				map.draggable = false;
+				PixelController.clearAll(map);
+				break;
+			case 'brush':
+				map.draggable = false;
+				map.setTool(brushTool);
+				break;
+			case 'pan':
+				map.draggable = true;
+				map.setTool(noopTool);
+				break;
+		};
+	});
+
 	var colorPicker = ColorPicker(function(value) {
-		if (!value) {
-			return PixelController.clearAll(map);
-		}
+//		if (!value) {
+//			return PixelController.clearAll(map);
+//		}
 
 		ViewModel.color = value;
 		BrushPool.prepare(ViewModel.brush);
@@ -52,12 +74,10 @@ function initialize() {
 	var brushPicker = BrushPicker(function(value) { ViewModel.brushShape = value; BrushPool.prepare(ViewModel.brush); });
 	var sizePicker = SizePicker(function(value) { ViewModel.brushSize = value; BrushPool.prepare(ViewModel.brush); });
 
-	map.addControls(colorPicker, 1);
-	map.addControls(brushPicker, 2);
-	map.addControls(sizePicker, 3);
-
-	var brushTool = BrushTool(map, PixelController, ViewModel);
-	map.setTool(brushTool);
+	map.addControls(toolPicker, 1);
+	map.addControls(colorPicker, 2);
+	map.addControls(brushPicker, 3);
+	map.addControls(sizePicker, 4);
 
 	PixelController.startUpdateLoop(map);
 }
